@@ -29,6 +29,7 @@ app.layout = html.Div([
            children="Click on link to view source data",
            href="https://www.kaggle.com/datasets/sahirmaharajj/air-pollution-dataset?resource=download",
            target="_blank",
+           style = {"color" : "blue", "fontSize" : "40px"}
        ),
        className="two columns",
    ),
