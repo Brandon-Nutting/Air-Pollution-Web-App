@@ -14,6 +14,10 @@ app = Dash(_name_, external_stylesheets=stylesheet)
 # Displays three dropdowns as one row
 app.layout = html.Div([
    html.Div(
+       html.H1("Analysis of air pollution",
+               style={"textAlign":"center"}),
+       className="row"), 
+   html.Div(
        dcc.Dropdown(
            id='Filter Dropdown',
            multi=True,
