@@ -26,7 +26,8 @@ app.layout = html.Div([
            multi=True,
            options=[
                {"label" : x, "value": x}
-               for x in sorted(pollution_df['Geo Place Name'].unique())],
+               for x in sorted(pollution_df['Geo Place Name'].unique())]
+           value = [x for x in pollution_df['Geo Place Name'].unique()],
         ),
        className="three columns",
    ),
