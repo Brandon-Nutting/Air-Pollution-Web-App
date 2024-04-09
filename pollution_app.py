@@ -16,7 +16,10 @@ app.layout = html.Div([
    html.Div(
        html.H1("Analysis of air pollution",
                style={"textAlign":"center"}),
-       className="row"), 
+       className="row"),
+   html.Div(
+       dcc.Graph(id = 'Pollution Chart', figure=fig),
+       className="row"),
    html.Div(
        dcc.Dropdown(
            id='Filter Dropdown',
