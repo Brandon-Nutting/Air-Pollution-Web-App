@@ -8,7 +8,7 @@ pollution_df = pd.read_csv("Input/Air_Quality.csv")
 
 # Use external stylesheet
 stylesheet = ['https://codepen.io/chriddyp/pen/bWLegP.css']
-app = Dash(_name_, external_stylesheets=stylesheet)
+app = Dash(__name__, external_stylesheets=stylesheet)
 
 app.layout = html.Div(
     [
@@ -53,4 +53,26 @@ app.layout = html.Div(
     Output(component_id="pollution-chart", component_property="figure"),
     [Input(component_id="filter-dropdown", component_property="value")],
 )
-
+def update_graph(selected_value):
+    print(f"Currently selected value: {selected_value}")
+    
+    if len(selected_value) == 0:
+        return {}
+    else:
+        filtered_pollution = pollution_df[pollution_df["Geo Place Name"].isin(selected_value)]
+        fig = px.line(
+            data_frame=filtered_pollution,
+            x = "Start_Date",
+            y="Data Value",
+            color = "Geo Place Name",
+            log_y=True,
+            labels={
+                "Start Date" : "Reading Date",
+                "Data Value" : "Pollution Value",
+                "Geo Name Place" : "Location"
+            },
+        )
+        return fig
+    
+if __name__ == "__main__":
+    app.run_server(debug=True)
