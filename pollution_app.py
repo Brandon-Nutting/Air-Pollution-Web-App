@@ -47,3 +47,10 @@ app.layout = html.Div(
         ),
     ]
 )
+
+# Callback functions
+@app.callback(
+    Output(component_id="pollution-chart", component_property="figure"),
+    [Input(component_id="filter-dropdown", component_property="value")],
+)
+
