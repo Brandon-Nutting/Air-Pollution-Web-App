@@ -13,12 +13,18 @@ countries["capitalCity"].replace({"" : None}, inplace = True)
 countries.dropna(subset = ["capitalCity"], inplace = True)
 countries = countries[["name", "iso3c"]]
 countries = countries[countries["name"] != "Kosovo"]
-countries.rename(colums = {"name":"country"})
+countries.rename(columns = {"name":"country"}, inplace = True)
+
+indicators = {
+    "IT.NET.USER.ZS" : "Individuals using the Internet (% of population)",
+    "SG.GEN.PARL.ZS" : "Proportion of seats held by women in national parliments (%)",
+    "EN.ATM.CO2E.KT" : "CO2 emissions (kt)"
+}
 
 def update_wb_data():
     """ Retreives updaetd data from API connection. """
     df = wb.download(
-        indicator = (list(indicators)), country = countries['is03'],
+        indicator = (list(indicators)), country = countries['iso3c'],
         start = 2005, end = 2016
     )
     df = df.reset_index()
@@ -29,7 +35,7 @@ def update_wb_data():
     df = df.rename(columns=indicators)
     return df
 
-applayout = dbc.Container(
+app.layout = dbc.Container(
     [
         dbc.Row(
             dbc.Col(
@@ -37,15 +43,15 @@ applayout = dbc.Container(
                     html.H1(
                         "Comparison of World Bank Country Data",
                         style={"textAlign": "center"},),
-                    dcc.Graph(id="my-choropleth", figure={})
+                    dcc.Graph(id="my_choropleth", figure={})
                 ],
                 width=12
             )
         ),
-        dbc.row(
-            dbc.col(
+        dbc.Row(
+            dbc.Col(
                 [
-                    dbc.label("Select Data Set:",
+                    dbc.Label("Select Data Set:",
                         className="fw-bold",
                         style={"textDecoration": "underline", "fontSize": 20},),
                     dbc.RadioItems(
@@ -58,11 +64,11 @@ applayout = dbc.Container(
                 width = 4,
             )
         ),
-        dbc.row(
+        dbc.Row(
             [
-                dbc.col(
+                dbc.Col(
                     [
-                        dbc.label(
+                        dbc.Label(
                             "Select Years:",
                             className="fw-bold",
                             style={"textDecoration": "underline", "fontSize": 20},),
@@ -71,7 +77,7 @@ applayout = dbc.Container(
                             min = 2005,
                             max = 2016,
                             step = 1,
-                            values=[2005,2006],
+                            value=[2005,2006],
                             marks={
                                 2005 : "2005",
                                 2005 : "'06",
@@ -88,7 +94,7 @@ applayout = dbc.Container(
                             },
                             ),
                         dbc.Button(
-                            id="my-button",
+                            id="my_button",
                             children="Submit",
                             n_clicks=0,
                             color="primary",
@@ -100,18 +106,11 @@ applayout = dbc.Container(
             ]
         ),
         dcc.Store(id = "storage", storage_type="local", data = {}),
-        dcc.Interval(id = "time", interval = 1000 * 60, n_intervals = 0),
+        dcc.Interval(id = "timer", interval = 1000 * 60, n_intervals = 0),
     ]
 )
 
-
-indicators = {
-    "IT.NET.USER.ZS" : "Individuals using the Internet (% of population)",
-    "SG.GEN.PARL.ZS" : "Proportion of seats held by women in national parliments (%)",
-    "EN.ATM.CO2E.KT" : "CO2 emissions (kt)"
-}
-
-@app.callback(Output("storage","data"), input("timer","n_intervals"))
+@app.callback(Output("storage","data"), Input("timer","n_intervals"))
 def store_data(n_time):
     dataframe = update_wb_data()
     return dataframe.to_dict("records")
@@ -130,11 +129,11 @@ def update_graph(n_clicks, stored_dataframe, years_chosen, indct_chosen):
     if years_chosen[0] != years_chosen[1]:
         dff = dff[dff.year.between(years_chosen[0], years_chosen[1])]
         dff = dff.groupby(["iso3c", "country"])[indct_chosen].mean()
-        dff.reset_index(inplace = True)
+        dff = dff.reset_index()
         
         fig = px.choropleth(
             data_frame=dff, 
-            location = "iso3c",
+            locations = "iso3c",
             color=indct_chosen,
             scope="world",
             hover_data={"iso3c" : False, "country" : True},
@@ -153,7 +152,7 @@ def update_graph(n_clicks, stored_dataframe, years_chosen, indct_chosen):
         dff = dff[dff["year"].isin(years_chosen)]
         fig = px.choropleth(
             data_frame=dff, 
-            location = "iso3c",
+            locations = "iso3c",
             color=indct_chosen,
             scope="world",
             hover_data={"iso3c" : False, "country" : True},
