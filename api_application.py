@@ -9,8 +9,8 @@ from pandas_datareader import wb
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 countries = wb.get_countries()
-countries["CapitalCity"].replace({"" : None}, inplace = True)
-countries.dropna(subset = ["CapitalCity"], inplace = True)
+countries["capitalCity"].replace({"" : None}, inplace = True)
+countries.dropna(subset = ["capitalCity"], inplace = True)
 countries = countries[["name", "iso3c"]]
 countries = countries[countries["name"] != "Kosovo"]
 countries.rename(colums = {"name":"country"})
