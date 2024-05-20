@@ -110,3 +110,65 @@ indicators = {
     "SG.GEN.PARL.ZS" : "Proportion of seats held by women in national parliments (%)",
     "EN.ATM.CO2E.KT" : "CO2 emissions (kt)"
 }
+
+@app.callback(Output("storage","data"), input("timer","n_intervals"))
+def store_data(n_time):
+    dataframe = update_wb_data()
+    return dataframe.to_dict("records")
+
+@app.callback(
+    Output("my_choropleth", "figure"),
+    Input("my_button", "n_clicks"),
+    Input("storage", "data"),
+    State("years-range","value"),
+    State("radio-indicator", "value"),
+)
+def update_graph(n_clicks, stored_dataframe, years_chosen, indct_chosen):
+    dff = pd.DataFrame.from_records(stored_dataframe)
+    print(years_chosen)
+    
+    if years_chosen[0] != years_chosen[1]:
+        dff = dff[dff.year.between(years_chosen[0], years_chosen[1])]
+        dff = dff.groupby(["iso3c", "country"])[indct_chosen].mean()
+        dff.reset_index(inplace = True)
+        
+        fig = px.choropleth(
+            data_frame=dff, 
+            location = "iso3c",
+            color=indct_chosen,
+            scope="world",
+            hover_data={"iso3c" : False, "country" : True},
+            labels = {
+                indicators["SG.GEN.PARL.ZS"] : "% parliment women",
+                indicators["IT.NET.USER.ZS"] : "pop % using interet",
+            },
+        )
+        fig.update_layout(
+            geo = {"projection" : {"type" : "natural earth"}},
+            margin = dict(l=50, r = 50, t = 50, b = 50),
+        )
+        return fig
+    
+    if years_chosen[0] == years_chosen[1]:
+        dff = dff[dff["year"].isin(years_chosen)]
+        fig = px.choropleth(
+            data_frame=dff, 
+            location = "iso3c",
+            color=indct_chosen,
+            scope="world",
+            hover_data={"iso3c" : False, "country" : True},
+            labels = {
+                indicators["SG.GEN.PARL.ZS"] : "% parliment women",
+                indicators["IT.NET.USER.ZS"] : "pop % using interet",
+            },
+        )
+        fig.update_layout(
+            geo = {"projection" : {"type" : "natural earth"}},
+            margin = dict(l=50, r = 50, t = 50, b = 50),
+        )
+        return fig
+    
+dcc.Interval(id = "timer", interval = 1000 * 10, n_intervals=0),
+
+if __name__ == "__main__":
+    app.run_server(debug = True)
