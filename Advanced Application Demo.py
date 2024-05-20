@@ -168,7 +168,5 @@ def update_graph(n_clicks, stored_dataframe, years_chosen, indct_chosen):
         )
         return fig
     
-dcc.Interval(id = "timer", interval = 1000 * 10, n_intervals=0),
-
 if __name__ == "__main__":
     app.run_server(debug = True)
